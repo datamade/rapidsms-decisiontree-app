@@ -4,7 +4,6 @@ from io import StringIO
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect
-# from django.utils.datastructures import SortedDict
 from collections import OrderedDict
 
 from .. import forms
