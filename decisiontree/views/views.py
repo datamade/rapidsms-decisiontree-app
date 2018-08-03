@@ -1,10 +1,10 @@
 import csv
-from StringIO import StringIO
+from io import StringIO
 
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 
 from .. import forms
 from .. import models
@@ -206,7 +206,7 @@ class SurveyReport(base.TreeDetailView):
         sessions = tree.sessions.select_related('connection__contact',
                                                 'connection__backend')
         sessions = sessions.order_by('-start_date')
-        columns = SortedDict()
+        columns = OrderedDict()
         for state in states:
             columns[state.pk] = []
         # for each session, created an ordered list of (state, entry) pairs
