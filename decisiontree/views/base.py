@@ -1,7 +1,7 @@
 """Common logic for CRUD views used in rapidsms-decisiontree."""
 
 from django.contrib import messages
-from django.contrib.admin.util import NestedObjects
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
