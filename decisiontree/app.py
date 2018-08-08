@@ -170,6 +170,13 @@ class App(AppBase):
         state = session.state
         if state and state.message:
             response = state.message.text
+            
+            # Get all answers associated with a message/question.
+            transitions = Transition.objects.filter(current_state=state)
+            answers = [t.answer.helper_text() for t in transitions]
+            answers = " or ".join(answers)
+            response += answers
+
             logger.info("Sending: %s", response)
             if msg:
                 msg.respond(response)
