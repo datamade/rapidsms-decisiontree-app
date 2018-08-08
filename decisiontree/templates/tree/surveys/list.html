@@ -20,7 +20,7 @@
         <tr>
           <td>{{ survey.pk }}</td>
           <td>{{ survey.trigger }}</td>
-          <td>{{ survey.root_state.question.text }}</td>
+          <td>{{ survey.root_state.message.text }}</td>
           <td>{{ survey.count }}</td>
           <td>
             <a class="edit-link" href="{% tenancy_url 'insert_tree' survey.id %}" title="Edit">

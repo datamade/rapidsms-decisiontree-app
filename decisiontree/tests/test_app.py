@@ -36,24 +36,24 @@ class BasicSurveyTest(DecisionTreeTestCase):
 
     def test_valid_trigger(self):
         msg = self._send('food')
-        question = self.transition.current_state.question.text
-        self.assertTrue(question in msg.responses[0]['text'])
+        message = self.transition.current_state.message.text
+        self.assertTrue(message in msg.responses[0]['text'])
 
     def test_basic_response(self):
         self._send('food')
         answer = self.transition.answer.answer
         msg = self._send(answer)
-        next_question = self.transition.next_state.question.text
-        self.assertTrue(next_question in msg.responses[0]['text'])
+        next_message = self.transition.next_state.message.text
+        self.assertTrue(next_message in msg.responses[0]['text'])
 
     def test_error_response(self):
         self._send('food')
         msg = self._send('bad-answer')
         self.assertTrue('is not a valid answer' in msg.responses[0]['text'])
 
-    def test_error_response_from_question(self):
-        self.survey.root_state.question.error_response = 'my error response'
-        self.survey.root_state.question.save()
+    def test_error_response_from_message(self):
+        self.survey.root_state.message.error_response = 'my error response'
+        self.survey.root_state.message.save()
         self._send('food')
         msg = self._send('bad-answer')
         self.assertTrue('my error response' == msg.responses[0]['text'])

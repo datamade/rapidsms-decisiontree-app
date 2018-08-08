@@ -14,18 +14,18 @@
       </tr>
     </thead>
     <tbody>
-      {% for question in object_list %}
+      {% for message in object_list %}
         <tr>
-          <td>{{ question.pk }}</td>
-          <td>{{ question.text }}</td>
-          <td>{{ question.error_response|truncatewords:10 }}</td>
+          <td>{{ message.pk }}</td>
+          <td>{{ message.text }}</td>
+          <td>{{ message.error_response|truncatewords:10 }}</td>
           <td>
-            <a href="{% tenancy_url 'insert_question' question.id %}" title="Edit" class="edit-link">
+            <a href="{% tenancy_url 'insert_message' message.id %}" title="Edit" class="edit-link">
               <i class="icon-pencil"></i>
             </a>
           </td>
           <td>
-            <a href="{% tenancy_url 'delete_question' question.id %}">
+            <a href="{% tenancy_url 'delete_message' message.id %}">
               <i class="icon-remove"></i>
             </a>
           </td>

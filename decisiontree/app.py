@@ -62,8 +62,8 @@ class App(AppBase):
         # not a valid answer, so remind the user of the valid options.
         if not found_transition:
             if transitions.count() == 0:
-                logger.error('No questions found!')
-                msg.respond(_("No questions found"))
+                logger.error('No messages found!')
+                msg.respond(_("No messages found"))
                 self._end_session(session, message=msg)
             else:
                 # update the number of times the user has tried
@@ -78,8 +78,8 @@ class App(AppBase):
                                     "Your session will now end. Please try again "
                                     "later." % session.num_tries)
                 # send them some hints about how to respond
-                elif state.question.error_response:
-                    msg.respond(state.question.error_response)
+                elif state.message.error_response:
+                    msg.respond(state.message.error_response)
                 else:
                     answers = [t.answer.helper_text() for t in transitions]
                     answers = " or ".join(answers)
@@ -114,28 +114,24 @@ class App(AppBase):
             msg.logger_msg.entry = entry
             msg.logger_msg.save()
 
-        # advance to the next question, or remove
-        # this caller's state if there are no more
-
-        # this might be "None" but that's ok, it will be the
-        # equivalent of ending the session
-        session.state = found_transition.next_state
+        next_state = found_transition.next_state
+        session.state = next_state
         session.num_tries = 0
         session.save()
 
-        # if this was the last message, end the session,
-        # and also check if the tree has a defined
-        # completion text and if so send it
-        if not session.state:
-            if session.tree.completion_text:
-                msg.respond(session.tree.completion_text)
+        '''
+        If the next state does not have a transition set, then it is a terminal state.
+        The user receives a final message, and the session ends. 
+        '''
+        if not next_state.transition_set:
+            msg.respond(next_state.text)
 
             # end the connection so the caller can start a new session
             self._end_session(session, message=msg)
 
         # if there is a next question ready to ask
         # send it along
-        self._send_question(session, msg)
+        self._send_message(session, msg)
         # if we haven't returned long before now, we're
         # long committed to dealing with this message
         return True
@@ -168,13 +164,13 @@ class App(AppBase):
         if tree.trigger in self.session_listeners:
             for func in self.session_listeners[tree.trigger]:
                 func(session, False)
-        self._send_question(session, msg)
+        self._send_message(session, msg)
 
-    def _send_question(self, session, msg=None):
-        """Sends the next question in the session, if there is one"""
+    def _send_message(self, session, msg=None):
+        """Sends the next message in the session, if there is one"""
         state = session.state
-        if state and state.question:
-            response = state.question.text
+        if state and state.message:
+            response = state.message.text
             logger.info("Sending: %s", response)
             if msg:
                 msg.respond(response)

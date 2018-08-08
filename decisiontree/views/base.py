@@ -78,7 +78,7 @@ class TreeListView(TenantViewMixin, ListView):
     def get_queryset(self):
         qs = super(TreeListView, self).get_queryset()
         if self.select_related is not None:
-            qs = qs.select_related(*self.select_related)
+            qs = qs.prefetch_related(*self.select_related)
         if self.order_by is not None:
             qs = qs.order_by(*self.order_by)
         if self.limit is not None:

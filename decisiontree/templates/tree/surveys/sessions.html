@@ -42,7 +42,7 @@
           </td>
           {% for entry in session.entries.select_related %}
             <td scope="row">
-              <span class='question'>{{ entry.transition.current_state.question.text }}</span>
+              <span class='message'>{{ entry.transition.current_state.message.text }}</span>
               <span class='answer'>{{ entry.text }}</span>
             </td>
             {% if not forloop.last %}

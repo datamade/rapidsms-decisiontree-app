@@ -9,14 +9,13 @@ from colorful.fields import RGBColorField
 
 
 @python_2_unicode_compatible
-class Question(models.Model):
+class Message(models.Model):
     text = models.CharField(
-        max_length=160, verbose_name="message text",
-        help_text="The text to send to the user.")
+        max_length=500, verbose_name="message text",
+        help_text="The text to send to the user, e.g., a question, completion text.")
     error_response = models.CharField(
         max_length=160, blank=True,
-        help_text="Optional error message to send if the question is not "
-                  "answered properly.")
+        help_text="Optional error message if the user does not send a valid response.")
 
     def __str__(self):
         return u"Q%s: %s" % (self.pk, self.text)
@@ -28,10 +27,10 @@ class Tree(models.Model):
 
     Trees have a trigger, which is is the incoming message that will initiate a
     tree.  They also have a root state which is the first state the tree will
-    be in.  The question linked to the root state will be the one that is sent
+    be in.  The Message linked to the root state will be the one that is sent
     when the tree is initiated.  The remaining logic of the tree is
     encapsulated by the Transition objects, which define how answers to
-    questions move from one state to the next.
+    messages move from one state to the next.
 
     A tree also has optional completion text, which is the message that will be
     sent to the user when they reach a node in the tree with no possible
@@ -42,11 +41,8 @@ class Tree(models.Model):
         help_text="The incoming message which triggers this Tree.")
     root_state = models.ForeignKey(
         "TreeState", related_name="tree_set",
-        help_text="The first Question sent when this Tree is triggered, "
+        help_text="The first Message sent when this Tree is triggered, "
                   "which may lead to many more.")
-    completion_text = models.CharField(
-        max_length=160, blank=True, null=True,
-        help_text="The message that will be sent when the tree is completed")
     summary = models.CharField(max_length=160, blank=True)
 
     class Meta(object):
@@ -72,7 +68,7 @@ class Tree(models.Model):
 
 @python_2_unicode_compatible
 class Answer(models.Model):
-    """An answer to a question.
+    """A response to a message.
 
     There are three possible types of answers:
 
@@ -124,11 +120,11 @@ class Answer(models.Model):
 @python_2_unicode_compatible
 class TreeState(models.Model):
     """
-    A TreeState is a location in a tree.  It is associated with a question and
+    A TreeState is a location in a tree.  It is associated with a message and
     a set of answers (transitions) that allow traversal to other states.
     """
     name = models.CharField(max_length=100)
-    question = models.ForeignKey(Question)
+    message = models.ForeignKey(Message)
     num_retries = models.PositiveIntegerField(
         blank=True, null=True,
         help_text="The number of tries the user has to get out of this state. "
@@ -139,14 +135,14 @@ class TreeState(models.Model):
         verbose_name = 'survey state'
 
     def __str__(self):
-        return self.question.text
+        return self.message.text
 
     def add_all_unique_children(self, added):
         """
         Adds all unique children of the state to the passed in list.  This
         happens recursively.
         """
-        transitions = self.transition_set.select_related('next_state__question')
+        transitions = self.transition_set.select_related('next_state__message')
         for transition in transitions:
             if transition.next_state:
                 if transition.next_state not in added:
@@ -188,8 +184,7 @@ class Transition(models.Model):
     """
     current_state = models.ForeignKey(TreeState)
     answer = models.ForeignKey(Answer, related_name='transitions')
-    next_state = models.ForeignKey(
-        TreeState, blank=True, null=True, related_name='next_state')
+    next_state = models.ForeignKey(TreeState, related_name='next_state')
     tags = models.ManyToManyField('Tag', related_name='transitions', blank=True)
 
     class Meta(object):
@@ -227,8 +222,7 @@ class Session(models.Model):
         TreeState, blank=True, null=True,
         help_text="None if the session is complete.")
     num_tries = models.PositiveIntegerField(
-        help_text="The number of times the user has tried to answer the "
-                  "current question.")
+        help_text="The number of times the user has tried to respond to the current message.")
     # this flag stores the difference between completed
     # on its own, or manually canceled.
     canceled = models.NullBooleanField(blank=True, null=True)
@@ -281,7 +275,7 @@ class Entry(models.Model):
     def __str__(self):
         return u"%s-%s: %s - %s" % (
             self.session.pk, self.sequence_id,
-            self.transition.current_state.question, self.text)
+            self.transition.current_state.message, self.text)
 
     def display_text(self):
         # assume that the display text is just the text,

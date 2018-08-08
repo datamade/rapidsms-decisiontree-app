@@ -12,15 +12,15 @@ class ResultsTest(DecisionTreeTestCase):
     def setUp(self):
         super(ResultsTest, self).setUp()
         self.q = mommy.make(
-            'decisiontree.Question', text='Do you like apples or squash more?')
+            'decisiontree.Message', text='Do you like apples or squash more?')
         mommy.make(
-            'decisiontree_multitenancy.QuestionLink', linked=self.q, tenant=self.tenant)
+            'decisiontree_multitenancy.MessageLink', linked=self.q, tenant=self.tenant)
         self.fruit = mommy.make(
             'decisiontree.Answer', type='A', name='apples', answer='apples')
         mommy.make(
             'decisiontree_multitenancy.AnswerLink', linked=self.fruit, tenant=self.tenant)
         self.state = mommy.make(
-            'decisiontree.TreeState', name='food', question=self.q)
+            'decisiontree.TreeState', name='food', message=self.q)
         mommy.make(
             'decisiontree_multitenancy.TreeStateLink', linked=self.state, tenant=self.tenant)
         self.survey = mommy.make(

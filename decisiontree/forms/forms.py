@@ -67,8 +67,8 @@ class PathCreateUpdateForm(TenancyModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PathCreateUpdateForm, self).__init__(*args, **kwargs)
-        states = models.TreeState.objects.select_related('question')
-        states = states.order_by('question__text')
+        states = models.TreeState.objects.select_related('message')
+        states = states.order_by('message__text')
         self.fields['current_state'].queryset = states
         self.fields['current_state'].label = 'Current State'
         self.fields['answer'].label = 'Answer'
@@ -77,16 +77,15 @@ class PathCreateUpdateForm(TenancyModelForm):
         self.fields['next_state'].queryset = states
         self.fields['tags'].label = 'Auto tags'
 
-
-class QuestionCreateUpdateForm(TenancyModelForm):
+class MessageCreateUpdateForm(TenancyModelForm):
     max_length = forms.ChoiceField(choices=MAX_LENGTH_CHOICES)
 
     class Meta:
-        model = models.Question
+        model = models.Message
         fields = ['max_length', 'text', 'error_response']
 
     def __init__(self, *args, **kwargs):
-        super(QuestionCreateUpdateForm, self).__init__(*args, **kwargs)
+        super(MessageCreateUpdateForm, self).__init__(*args, **kwargs)
         self.fields['text'].widget = forms.Textarea()
         self.fields['error_response'].widget = forms.Textarea()
 
@@ -95,7 +94,7 @@ class QuestionCreateUpdateForm(TenancyModelForm):
         error_response = self.cleaned_data.get('error_response', '')
         max_length = int(self.cleaned_data.get('max_length', 0))
         if len(text) > max_length:
-            err_msg = 'Question text is too long. Maximum length is %d' % max_length
+            err_msg = 'Message text is too long. Maximum length is %d' % max_length
             self.add_error('text', forms.ValidationError(err_msg))
         if len(error_response) > max_length:
             err_msg = 'Error response text is too long. Maximum length is %d' % max_length
@@ -107,7 +106,7 @@ class StateCreateUpdateForm(TenancyModelForm):
 
     class Meta:
         model = models.TreeState
-        fields = ['name', 'question', 'num_retries']
+        fields = ['name', 'message', 'num_retries']
 
 
 class SurveyCreateUpdateForm(TenancyModelForm):
@@ -115,24 +114,15 @@ class SurveyCreateUpdateForm(TenancyModelForm):
 
     class Meta:
         model = models.Tree
-        fields = ['max_length', 'trigger', 'root_state', 'completion_text', 'summary']
+        fields = ['max_length', 'trigger', 'root_state', 'summary']
 
     def __init__(self, *args, **kwargs):
         super(SurveyCreateUpdateForm, self).__init__(*args, **kwargs)
         root_state = self.fields['root_state']
         root_state.label = 'First State'
-        root_state.queryset = root_state.queryset.select_related('question')
-        root_state.queryset = root_state.queryset.order_by('question__text')
-        self.fields['completion_text'].widget = forms.Textarea()
+        root_state.queryset = root_state.queryset.select_related('message')
+        root_state.queryset = root_state.queryset.order_by('message__text')
         self.fields['summary'].widget = forms.Textarea()
-
-    def clean(self):
-        completion_text = self.cleaned_data.get('completion_text', '')
-        max_length = int(self.cleaned_data.get('max_length', 0))
-        if len(completion_text) > max_length:
-            err_msg = 'Completion text is too long. Maximum length is %d' % max_length
-            self.add_error('completion_text', forms.ValidationError(err_msg))
-        return self.cleaned_data
 
 
 class TagCreateUpdateForm(TenancyModelForm):

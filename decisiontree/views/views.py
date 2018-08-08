@@ -61,14 +61,14 @@ class EntryUpdate(base.TreeUpdateView):
 class PathList(base.TreeListView):
     create_url_name = 'add_path'
     model = models.Transition
-    order_by = ['current_state__question__text']
-    select_related = ['current_state__question', 'next_state__question', 'answer', 'tags']
+    order_by = ['current_state__message__text']
+    select_related = ['current_state__message', 'next_state__message', 'answer', 'tags']
     template_name = "tree/paths/list.html"
 
 
 class PathCreateUpdate(base.TreeCreateUpdateView):
     cancellation_url_name = 'path_list'
-    create_success_message = "You have successfully inserted Question Path {obj.id}"
+    create_success_message = "You have successfully inserted Path {obj.id}"
     edit_success_message = "Path successfully updated"
     form_class = forms.PathCreateUpdateForm
     model = models.Transition
@@ -82,35 +82,35 @@ class PathDelete(base.TreeDeleteView):
     success_url_name = 'path_list'
 
 
-class QuestionList(base.TreeListView):
-    create_url_name = 'add_question'
-    model = models.Question
+class MessageList(base.TreeListView):
+    create_url_name = 'add_message'
+    model = models.Message
     order_by = ['text']
-    template_name = 'tree/questions/list.html'
+    template_name = 'tree/messages/list.html'
 
 
-class QuestionCreateUpdate(base.TreeCreateUpdateView):
-    cancellation_url_name = 'list-questions'
-    create_success_message = "You have successfully inserted a Question {obj.text}"
-    edit_success_message = "You have successfully updated the Question"
-    form_class = forms.QuestionCreateUpdateForm
-    model = models.Question
-    success_url_name = 'list-questions'
-    template_name = "tree/questions/create_update.html"
+class MessageCreateUpdate(base.TreeCreateUpdateView):
+    cancellation_url_name = 'list-messages'
+    create_success_message = "You have successfully inserted a Message {obj.text}"
+    edit_success_message = "You have successfully updated the Message"
+    form_class = forms.MessageCreateUpdateForm
+    model = models.Message
+    success_url_name = 'list-messages'
+    template_name = "tree/messages/create_update.html"
 
 
-class QuestionDelete(base.TreeDeleteView):
-    cancellation_url_name = 'list-questions'
-    model = models.Question
-    success_message = "Question successfully deleted"
-    success_url_name = 'list-questions'
+class MessageDelete(base.TreeDeleteView):
+    cancellation_url_name = 'list-messages'
+    model = models.Message
+    success_message = "Message successfully deleted"
+    success_url_name = 'list-messages'
 
 
 class StateList(base.TreeListView):
     create_url_name = 'add_state'
     model = models.TreeState
-    order_by = ['question']
-    select_related = ['question']
+    order_by = ['message']
+    select_related = ['message']
     template_name = "tree/states/list.html"
 
 
@@ -134,7 +134,7 @@ class SurveyList(base.TreeListView):
     create_url_name = 'add_tree'
     model = models.Tree
     order_by = ['trigger']
-    select_related = ['root_state__question']
+    select_related = ['root_state__message']
     template_name = 'tree/surveys/list.html'
 
     def get_queryset(self):
@@ -152,7 +152,7 @@ class SurveyExport(base.TreeDetailView):
         output = StringIO()
         w = csv.writer(output)
         headings = ["Person", "Date"]
-        headings.extend([state.question for state in all_states])
+        headings.extend([state.message for state in all_states])
         w.writerow(headings)
         sessions = models.Session.objects.filter(tree=tree)
         for session in sessions:

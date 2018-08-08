@@ -22,11 +22,11 @@ class TestPathDelete(DeleteViewTestMixin, DecisionTreeTestCase):
     url_name = 'delete_path'
 
 
-class TestQuestionDelete(DeleteViewTestMixin, DecisionTreeTestCase):
-    link_model = link_models.QuestionLink
-    model = models.Question
-    success_url_name = 'list-questions'
-    url_name = 'delete_question'
+class TestMessageDelete(DeleteViewTestMixin, DecisionTreeTestCase):
+    link_model = link_models.MessageLink
+    model = models.Message
+    success_url_name = 'list-messages'
+    url_name = 'delete_message'
 
 
 class TestStateDelete(DeleteViewTestMixin, DecisionTreeTestCase):

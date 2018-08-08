@@ -7,15 +7,15 @@ class TreeAdmin(admin.ModelAdmin):
     list_display = ('trigger', '_root_state', '_summary')
 
     def _root_state(self, obj):
-        return obj.root_state.question.text
-    _root_state.short_description = 'First question'
+        return obj.root_state.message.text
+    _root_state.short_description = 'First message'
 
     def _summary(self, obj):
         return obj.summary
     _summary.short_description = 'Description'
 
 
-class QuestionAdmin(admin.ModelAdmin):
+class MessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'text')
 
 
@@ -31,12 +31,12 @@ class StateAdmin(admin.ModelAdmin):
         fk_name = 'current_state'
         extra = 0
 
-    list_display = ('id', 'name', '_question', 'num_retries', 'num_transitions')
+    list_display = ('id', 'name', '_message', 'num_retries', 'num_transitions')
     inlines = (TransitionInlineAdmin,)
 
-    def _question(self, obj):
-        return obj.question.text
-    _question.short_description = 'Question'
+    def _message(self, obj):
+        return obj.message.text
+    _message.short_description = 'Message'
 
     def num_transitions(self, obj):
         return obj.transition_set.count()
@@ -70,7 +70,7 @@ class SessionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Tree, TreeAdmin)
-admin.site.register(models.Question, QuestionAdmin)
+admin.site.register(models.Message, MessageAdmin)
 admin.site.register(models.Answer, AnswerAdmin)
 admin.site.register(models.TreeState, StateAdmin)
 admin.site.register(models.Transition, TransitionAdmin)

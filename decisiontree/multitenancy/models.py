@@ -27,8 +27,8 @@ class EntryLink(TenantLink):
     linked = models.OneToOneField('decisiontree.Entry', related_name='tenantlink')
 
 
-class QuestionLink(TenantLink):
-    linked = models.OneToOneField('decisiontree.Question', related_name='tenantlink')
+class MessageLink(TenantLink):
+    linked = models.OneToOneField('decisiontree.Message', related_name='tenantlink')
 
 
 class SessionLink(TenantLink):

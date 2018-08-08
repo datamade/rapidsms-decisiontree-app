@@ -4,5 +4,5 @@ The following survey responses were tagged recently:{% for tag, notifications in
 
 {{ tag.name }}
 {% for notification in notifications %}
-{{ notification.entry.time|date:"Y-m-d h:i a" }} "{{ notification.entry.transition.current_state.question.text }} -> {{ notification.entry.text }}" by {{ notification.entry.session.connection.contact }}{% endfor %}
+{{ notification.entry.time|date:"Y-m-d h:i a" }} "{{ notification.entry.transition.current_state.message.text }} -> {{ notification.entry.text }}" by {{ notification.entry.session.connection.contact }}{% endfor %}
 {% endfor %}

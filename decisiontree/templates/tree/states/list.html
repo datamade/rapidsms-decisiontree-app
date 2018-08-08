@@ -8,7 +8,7 @@
       <tr>
         <th>ID</th>
         <th>Name</th>
-        <th>Question</th>
+        <th>Message</th>
         <th># Retries</th>
         <th>Edit</th>
         <th>Delete</th>
@@ -19,7 +19,7 @@
         <tr>
           <td>{{ state.pk }}</td>
           <td>{{ state.name }}</td>
-          <td>{{ state.question.text }}</td>
+          <td>{{ state.message.text }}</td>
           <td>{{ state.num_retries }}</td>
           <td>
             <a href="{% tenancy_url 'insert_state' state.id %}" title="Edit" class="edit-link">
