@@ -22,6 +22,10 @@ class App(AppBase):
     session_listeners = {}
 
     def handle(self, msg):
+        '''
+        Get the connection from the Rapidsms IncomingMessage object, 
+        and find all sessions that relate to it and the states that relate to those sessions.
+        '''
         sessions = msg.connection.session_set.open().select_related('state')
 
         # if no open sessions exist for this contact, find the tree's trigger
@@ -35,9 +39,10 @@ class App(AppBase):
             self.start_tree(survey, msg.connection, msg)
             return True
 
+
         # the caller is part-way though a question
         # tree, so check their answer and respond
-        session = sessions[0]
+        session = sessions.latest('start_date')
         state = session.state
         logger.debug(state)
 
@@ -114,27 +119,21 @@ class App(AppBase):
             msg.logger_msg.entry = entry
             msg.logger_msg.save()
 
-        next_state = found_transition.next_state
-        session.state = next_state
+        session.state = found_transition.next_state
         session.num_tries = 0
         session.save()
 
         '''
         If the next state does not have a transition set, then it is a terminal state.
-        The user receives a final message, and the session ends. 
+        End the session. 
         '''
-        if not next_state.transition_set:
-            msg.respond(next_state.text)
-
-            # end the connection so the caller can start a new session
+        transition_set = Transition.objects.filter(current_state=session.state)
+        if not transition_set:
+            msg.respond(session.state.message.text)
             self._end_session(session, message=msg)
+        else:
+            self._send_message(session, msg)
 
-        # if there is a next question ready to ask
-        # send it along
-        self._send_message(session, msg)
-        # if we haven't returned long before now, we're
-        # long committed to dealing with this message
-        return True
 
     def tick(self, session):
         """
