@@ -39,7 +39,6 @@ class App(AppBase):
             self.start_tree(survey, msg.connection, msg)
             return True
 
-
         # the caller is part-way though a question
         # tree, so check their answer and respond
         session = sessions.latest('start_date')
@@ -86,20 +85,14 @@ class App(AppBase):
                 elif state.message.error_response:
                     msg.respond(state.message.error_response)
                 else:
-                    answers = [t.answer.helper_text() for t in transitions]
-                    answers = " or ".join(answers)
-                    response = '"%s" is not a valid answer. You must enter ' + answers
-                    msg.respond(response % msg.text)
+                    invalid_msg = '"{}" is not a valid answer. Please choose one of the following: '.format(msg.text)
+                    response = self._concate_answers(invalid_msg, state)
+                    msg.respond(response)
 
                 session.save()
             return True
 
-        # create an entry for this response
-        # first have to know what sequence number to insert
-        try:
-            last_entry = session.entries.order_by('-sequence_id')[0]
-        except IndexError:
-            last_entry = None
+        last_entry = Entry.objects.filter(session=session).order_by('sequence_id').last()
         if last_entry:
             sequence = last_entry.sequence_id + 1
         else:
@@ -131,8 +124,13 @@ class App(AppBase):
         if not transition_set:
             msg.respond(session.state.message.text)
             self._end_session(session, message=msg)
-        else:
-            self._send_message(session, msg)
+
+        # if there is a next question ready to ask
+        # send it along
+        self._send_message(session, msg)
+        # if we haven't returned long before now, we're
+        # long committed to dealing with this message
+        return True
 
 
     def tick(self, session):
@@ -169,13 +167,7 @@ class App(AppBase):
         """Sends the next message in the session, if there is one"""
         state = session.state
         if state and state.message:
-            response = state.message.text
-            
-            # Get all answers associated with a message/question.
-            transitions = Transition.objects.filter(current_state=state)
-            answers = [t.answer.helper_text() for t in transitions]
-            answers = " or ".join(answers)
-            response += answers
+            response = self._concate_answers(state.message.text, state)
 
             logger.info("Sending: %s", response)
             if msg:
@@ -249,3 +241,11 @@ class App(AppBase):
             else:
                 raise Exception("Can't find a function to match custom key: %s", answer)
         raise Exception("Don't know how to process answer type: %s", answer.type)
+
+    def _concate_answers(self, response, state):
+        transition_set = Transition.objects.filter(current_state=state)
+        for t in transition_set:
+            response += t.answer.helper_text()
+
+        return response
+
