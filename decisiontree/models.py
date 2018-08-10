@@ -103,7 +103,7 @@ class Answer(models.Model):
     def helper_text(self):
         if self.type == "A":
             if self.description:
-                return "%s (%s)" % (self.answer, self.description)
+                return "\n(%s) %s" % (self.answer, self.description)
             return self.answer
         if self.type == "R":
             if self.description:

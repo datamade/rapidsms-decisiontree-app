@@ -22,6 +22,10 @@ class App(AppBase):
     session_listeners = {}
 
     def handle(self, msg):
+        '''
+        Get the connection from the Rapidsms IncomingMessage object, 
+        and find all sessions that relate to it and the states that relate to those sessions.
+        '''
         sessions = msg.connection.session_set.open().select_related('state')
 
         # if no open sessions exist for this contact, find the tree's trigger
@@ -37,7 +41,7 @@ class App(AppBase):
 
         # the caller is part-way though a question
         # tree, so check their answer and respond
-        session = sessions[0]
+        session = sessions.latest('start_date')
         state = session.state
         logger.debug(state)
 
@@ -81,20 +85,14 @@ class App(AppBase):
                 elif state.message.error_response:
                     msg.respond(state.message.error_response)
                 else:
-                    answers = [t.answer.helper_text() for t in transitions]
-                    answers = " or ".join(answers)
-                    response = '"%s" is not a valid answer. You must enter ' + answers
-                    msg.respond(response % msg.text)
+                    invalid_msg = '"{}" is not a valid answer. Please choose one of the following: '.format(msg.text)
+                    response = self._concat_answers(invalid_msg, state)
+                    msg.respond(response)
 
                 session.save()
             return True
 
-        # create an entry for this response
-        # first have to know what sequence number to insert
-        try:
-            last_entry = session.entries.order_by('-sequence_id')[0]
-        except IndexError:
-            last_entry = None
+        last_entry = Entry.objects.filter(session=session).order_by('sequence_id').last()
         if last_entry:
             sequence = last_entry.sequence_id + 1
         else:
@@ -114,19 +112,17 @@ class App(AppBase):
             msg.logger_msg.entry = entry
             msg.logger_msg.save()
 
-        next_state = found_transition.next_state
-        session.state = next_state
+        session.state = found_transition.next_state
         session.num_tries = 0
         session.save()
 
         '''
         If the next state does not have a transition set, then it is a terminal state.
-        The user receives a final message, and the session ends. 
+        End the session. 
         '''
-        if not next_state.transition_set:
-            msg.respond(next_state.text)
-
-            # end the connection so the caller can start a new session
+        transition_set = Transition.objects.filter(current_state=session.state)
+        if not transition_set:
+            msg.respond(session.state.message.text)
             self._end_session(session, message=msg)
 
         # if there is a next question ready to ask
@@ -135,6 +131,7 @@ class App(AppBase):
         # if we haven't returned long before now, we're
         # long committed to dealing with this message
         return True
+
 
     def tick(self, session):
         """
@@ -170,7 +167,8 @@ class App(AppBase):
         """Sends the next message in the session, if there is one"""
         state = session.state
         if state and state.message:
-            response = state.message.text
+            response = self._concat_answers(state.message.text, state)
+
             logger.info("Sending: %s", response)
             if msg:
                 msg.respond(response)
@@ -243,3 +241,11 @@ class App(AppBase):
             else:
                 raise Exception("Can't find a function to match custom key: %s", answer)
         raise Exception("Don't know how to process answer type: %s", answer.type)
+
+    def _concat_answers(self, response, state):
+        transition_set = Transition.objects.filter(current_state=state)
+        for t in transition_set:
+            response += t.answer.helper_text()
+
+        return response
+
