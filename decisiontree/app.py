@@ -86,7 +86,7 @@ class App(AppBase):
                     msg.respond(state.message.error_response)
                 else:
                     invalid_msg = '"{}" is not a valid answer. Please choose one of the following: '.format(msg.text)
-                    response = self._concate_answers(invalid_msg, state)
+                    response = self._concat_answers(invalid_msg, state)
                     msg.respond(response)
 
                 session.save()
@@ -167,7 +167,7 @@ class App(AppBase):
         """Sends the next message in the session, if there is one"""
         state = session.state
         if state and state.message:
-            response = self._concate_answers(state.message.text, state)
+            response = self._concat_answers(state.message.text, state)
 
             logger.info("Sending: %s", response)
             if msg:
@@ -242,7 +242,7 @@ class App(AppBase):
                 raise Exception("Can't find a function to match custom key: %s", answer)
         raise Exception("Don't know how to process answer type: %s", answer.type)
 
-    def _concate_answers(self, response, state):
+    def _concat_answers(self, response, state):
         transition_set = Transition.objects.filter(current_state=state)
         for t in transition_set:
             response += t.answer.helper_text()
