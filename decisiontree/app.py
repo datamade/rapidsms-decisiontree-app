@@ -23,21 +23,28 @@ class App(AppBase):
 
     def handle(self, msg):
         '''
-        Get the connection from the Rapidsms IncomingMessage object, 
-        and find all sessions that relate to it and the states that relate to those sessions.
+        The handle function should return True or False.
+        True tells RapidSMS that the message has been handled.
+        False tell RapidSMS that another app should handle it. 
+        https://rapidsms.readthedocs.io/en/develop/tutorial/tutorial02.html#handling-a-message 
+        
+        msg is an instance of a Rapidsms IncomingMessage object.
+        https://github.com/rapidsms/rapidsms/blob/347a4d05566ef68d9f494d329cbdc85ce28e811c/rapidsms/messages/incoming.py#L9  
         '''
-        sessions = msg.connection.session_set.open().select_related('state')
-
-        # if no open sessions exist for this contact, find the tree's trigger
-        if sessions.count() == 0:
-            logger.debug("No session found")
-            survey = get_survey(msg.text, msg.connection)
-            if not survey:
-                logger.info('Tree not found: %s', msg.text)
-                return False
-            # start a new session for this person and save it
+        # Try to find a survey/tree with the incoming message, i.e., trigger word.
+        # If found, then the user wants to (re)start the survey.
+        survey = get_survey(msg.text, msg.connection)
+        if survey:
             self.start_tree(survey, msg.connection, msg)
-            return True
+            return True 
+
+        sessions = msg.connection.session_set.open().select_related('state')
+        if not survey and sessions.count() == 0:
+            logger.info('Tree not found: %s', msg.text)
+            # Error message handled by the default RapidSMS app
+            # https://github.com/rapidsms/rapidsms/blob/master/docs/ref/settings.rst#default_response
+            # TODO: customize it.
+            return False
 
         # the caller is part-way though a question
         # tree, so check their answer and respond
