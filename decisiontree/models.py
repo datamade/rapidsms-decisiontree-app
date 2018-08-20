@@ -135,7 +135,7 @@ class TreeState(models.Model):
         verbose_name = 'survey state'
 
     def __str__(self):
-        return self.message.text
+        return self.name
 
     def add_all_unique_children(self, added):
         """
