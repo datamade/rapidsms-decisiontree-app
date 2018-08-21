@@ -130,6 +130,7 @@ class App(AppBase):
         transition_set = Transition.objects.filter(current_state=session.state)
         if not transition_set:
             msg.respond(session.state.message.text)
+            msg.respond('End of survey. Contact the Corporation for Supportive Housing for more info. csh.org/chicagoces')
             self._end_session(session, message=msg)
 
         # if there is a next question ready to ask
