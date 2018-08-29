@@ -44,6 +44,8 @@ class App(AppBase):
             # Error message handled by the default RapidSMS app
             # https://github.com/rapidsms/rapidsms/blob/master/docs/ref/settings.rst#default_response
             # TODO: customize it.
+
+
             return False
 
         # the caller is part-way though a question
@@ -169,6 +171,7 @@ class App(AppBase):
         if tree.trigger in self.session_listeners:
             for func in self.session_listeners[tree.trigger]:
                 func(session, False)
+
         self._send_message(session, msg)
 
     def _send_message(self, session, msg=None):
