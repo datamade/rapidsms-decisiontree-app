@@ -41,10 +41,6 @@ class App(AppBase):
         sessions = msg.connection.session_set.open().select_related('state')
         if not survey and sessions.count() == 0:
             logger.info('Tree not found: %s', msg.text)
-            # Error message handled by the default RapidSMS app
-            # https://github.com/rapidsms/rapidsms/blob/master/docs/ref/settings.rst#default_response
-            # TODO: customize it.
-
 
             return False
 
