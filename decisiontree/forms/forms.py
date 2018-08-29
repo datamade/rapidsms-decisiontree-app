@@ -78,7 +78,9 @@ class PathCreateUpdateForm(TenancyModelForm):
         self.fields['tags'].label = 'Auto tags'
 
 class MessageCreateUpdateForm(TenancyModelForm):
-    max_length = forms.ChoiceField(choices=MAX_LENGTH_CHOICES)
+    max_length = forms.ChoiceField(choices=((500, 'English'),
+                                            (500, 'Arabic'),
+                                            ))
 
     class Meta:
         model = models.Message

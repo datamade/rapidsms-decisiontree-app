@@ -41,9 +41,7 @@ class App(AppBase):
         sessions = msg.connection.session_set.open().select_related('state')
         if not survey and sessions.count() == 0:
             logger.info('Tree not found: %s', msg.text)
-            # Error message handled by the default RapidSMS app
-            # https://github.com/rapidsms/rapidsms/blob/master/docs/ref/settings.rst#default_response
-            # TODO: customize it.
+
             return False
 
         # the caller is part-way though a question
@@ -169,6 +167,7 @@ class App(AppBase):
         if tree.trigger in self.session_listeners:
             for func in self.session_listeners[tree.trigger]:
                 func(session, False)
+
         self._send_message(session, msg)
 
     def _send_message(self, session, msg=None):
