@@ -250,6 +250,7 @@ class App(AppBase):
         raise Exception("Don't know how to process answer type: %s", answer.type)
 
     def _concat_answers(self, response, state):
+        response += '\n'
         transition_set = Transition.objects.filter(current_state=state).order_by('answer')
         for t in transition_set:
             response += t.answer.helper_text()
