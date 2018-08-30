@@ -128,7 +128,9 @@ class App(AppBase):
         transition_set = Transition.objects.filter(current_state=session.state)
         if not transition_set:
             msg.respond(session.state.message.text)
-            msg.respond('End of survey. Contact the Corporation for Supportive Housing for more info. csh.org/chicagoces')
+            # If the last state includes a resource recommendation, then send a message announcing the completion of the survey.
+            if 'End of survey' not in session.state.message.text:
+                msg.respond('End of survey!  We\'ve recommended all relevant resources.\n Contact the Corporation for Supportive Housing for more info. csh.org/chicagoces')
             self._end_session(session, message=msg)
 
         # if there is a next question ready to ask
