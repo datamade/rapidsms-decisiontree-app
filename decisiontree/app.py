@@ -33,6 +33,7 @@ class App(AppBase):
         '''
         # Try to find a survey/tree with the incoming message, i.e., trigger word.
         # If found, then the user wants to (re)start the survey.
+        msg.text = msg.text.lower()
         survey = get_survey(msg.text, msg.connection)
         if survey:
             self.start_tree(survey, msg.connection, msg)
