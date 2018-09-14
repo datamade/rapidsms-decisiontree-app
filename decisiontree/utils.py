@@ -1,6 +1,6 @@
 from django.utils.encoding import force_text
 
-from .models import Tree
+from .models import Tree, Transition
 
 
 def get_survey(trigger, connection):
@@ -126,3 +126,11 @@ def edit_string_for_tags(tags):
         else:
             names.append(name)
     return u', '.join(sorted(names))
+
+def concat_answers(response, state):
+    response += '\n'
+    transition_set = Transition.objects.filter(current_state=state).order_by('answer')
+    for t in transition_set:
+        response += t.answer.helper_text()
+
+    return response

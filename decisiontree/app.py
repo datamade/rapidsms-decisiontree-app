@@ -11,7 +11,7 @@ from rapidsms.models import Connection
 from . import conf
 from .models import Entry, Session, TagNotification, Transition
 from .signals import session_end_signal
-from .utils import get_survey
+from .utils import get_survey, concat_answers
 
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ class App(AppBase):
             self.start_tree(survey, msg.connection, msg)
             return True 
 
+        
         sessions = msg.connection.session_set.open().select_related('state')
         if not survey and sessions.count() == 0:
             logger.info('Tree not found: %s', msg.text)
@@ -91,7 +92,7 @@ class App(AppBase):
                     msg.respond(state.message.error_response)
                 else:
                     invalid_msg = '"{}" is not a valid answer. Please choose one of the following: '.format(msg.text)
-                    response = self._concat_answers(invalid_msg, state)
+                    response = concat_answers(invalid_msg, state)
                     msg.respond(response)
 
                 session.save()
@@ -176,7 +177,7 @@ class App(AppBase):
         """Sends the next message in the session, if there is one"""
         state = session.state
         if state and state.message:
-            response = self._concat_answers(state.message.text, state)
+            response = concat_answers(state.message.text, state)
 
             logger.info("Sending: %s", response)
             if msg:
@@ -251,11 +252,11 @@ class App(AppBase):
                 raise Exception("Can't find a function to match custom key: %s", answer)
         raise Exception("Don't know how to process answer type: %s", answer.type)
 
-    def _concat_answers(self, response, state):
-        response += '\n'
-        transition_set = Transition.objects.filter(current_state=state).order_by('answer')
-        for t in transition_set:
-            response += t.answer.helper_text()
+    # def _concat_answers(self, response, state):
+    #     response += '\n'
+    #     transition_set = Transition.objects.filter(current_state=state).order_by('answer')
+    #     for t in transition_set:
+    #         response += t.answer.helper_text()
 
-        return response
+    #     return response
 

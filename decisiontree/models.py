@@ -227,6 +227,7 @@ class Session(models.Model):
     # on its own, or manually canceled.
     canceled = models.NullBooleanField(blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, null=True)
+    user_name = models.CharField(blank=True, max_length=160)
 
     objects = SessionQuerySet.as_manager()
 
