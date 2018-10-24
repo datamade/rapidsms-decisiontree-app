@@ -223,6 +223,7 @@ class Session(models.Model):
         help_text="None if the session is complete.")
     state_at_close = models.ForeignKey(
         TreeState, blank=True, null=True,
+        related_name="state_at_close",
         help_text="State when the session closes.")
     num_tries = models.PositiveIntegerField(
         help_text="The number of times the user has tried to respond to the current message.")
