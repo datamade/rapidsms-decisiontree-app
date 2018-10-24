@@ -221,6 +221,9 @@ class Session(models.Model):
     state = models.ForeignKey(
         TreeState, blank=True, null=True,
         help_text="None if the session is complete.")
+    state_at_close = models.ForeignKey(
+        TreeState, blank=True, null=True,
+        help_text="State when the session closes.")
     num_tries = models.PositiveIntegerField(
         help_text="The number of times the user has tried to respond to the current message.")
     # this flag stores the difference between completed
@@ -242,8 +245,8 @@ class Session(models.Model):
 
         No operation if session is already closed.
         """
-        # TODO: call app listeners?
         if not self.is_closed():
+            self.state_at_close = self.state
             self.state = None
             self.canceled = canceled
             self.save()
