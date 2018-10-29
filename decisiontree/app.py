@@ -50,6 +50,10 @@ class App(AppBase):
         state = session.state
         logger.debug(state)
 
+        # By default, rapidsms-decisiontree-app assigns the value "end" 
+        # to this variable (see conf.py).
+        # However, with a Twilio integration, Twilio handles this trigger 
+        # before the `decisiontree` app can.
         end_trigger = conf.SESSION_END_TRIGGER
         if end_trigger is not None and msg.text == end_trigger:
             response = _("Your session with '%s' has ended")
@@ -195,8 +199,13 @@ class App(AppBase):
                                  "be sent", connection.backend.slug)
 
     def _end_session(self, session, canceled=False, message=None):
-        """Ends a session, by setting its state to none,
-           and alerting any session listeners"""
+        """ Ends a session, by setting its `state` to None 
+            and `canceled` to False (which indicates that the session was completed on its own, 
+            rather than manually canceled)
+
+           Note: The original rapidsms-decisiontree authors suggest that this step should 
+           "alert any session listeners" – however, those authors did not implement such a suggestion 
+           in the `close` function, and not doing so did not seem to have any bearing on the functionality of the code. """
         session.close(canceled)
         if session.tree.trigger in self.session_listeners:
             for func in self.session_listeners[session.tree.trigger]:
