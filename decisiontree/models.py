@@ -16,6 +16,7 @@ class Message(models.Model):
     error_response = models.CharField(
         max_length=160, blank=True,
         help_text="Optional error message if the user does not send a valid response.")
+    recommendation = models.BooleanField(default=False)
 
     def __str__(self):
         return u"Q%s: %s" % (self.pk, self.text)
