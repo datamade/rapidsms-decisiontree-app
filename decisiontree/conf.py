@@ -1,5 +1,6 @@
 from django.conf import settings
 
+INVALID_ANSWER_RESPONSE = getattr(settings, 'INVALID_ANSWER_RESPONSE', 'Not a valid answer. Choose one of the following.')
 
 NOTIFICATIONS_ENABLED = getattr(settings, 'DECISIONTREE_NOTIFICATIONS', False)
 

@@ -94,7 +94,7 @@ class App(AppBase):
                 elif state.message.error_response:
                     msg.respond(state.message.error_response)
                 else:
-                    invalid_msg = '"{}" is not a valid answer. Please choose one of the following: '.format(msg.text)
+                    invalid_msg = conf.INVALID_ANSWER_RESPONSE
                     response = self._concat_answers(invalid_msg, state)
                     msg.respond(response)
 
