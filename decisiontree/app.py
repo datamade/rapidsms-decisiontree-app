@@ -132,9 +132,7 @@ class App(AppBase):
         transition_set = Transition.objects.filter(current_state=session.state)
         if not transition_set:
             msg.respond(session.state.message.text)
-            # If the last state includes a resource recommendation, then send a message announcing the completion of the survey.
-            if 'anything else to ask you' not in session.state.message.text:
-                msg.respond('Look at that! I don\'t have anything else to ask you. You should have some useful resources that can help you get to your next location. It was nice getting to know you, and remember: you can always reach me by texting "home" to this number.')
+
             self._end_session(session, message=msg)
 
         # if there is a next question ready to ask
@@ -207,11 +205,13 @@ class App(AppBase):
            "alert any session listeners" – however, those authors did not implement such a suggestion 
            in the `close` function, and not doing so did not seem to have any bearing on the functionality of the code. """
         session.close(canceled)
+
         if session.tree.trigger in self.session_listeners:
             for func in self.session_listeners[session.tree.trigger]:
                 func(session, True)
         session_end_signal.send(sender=self, session=session, canceled=canceled,
                                 message=message)
+
 
     def end_sessions(self, connection):
         """ Ends all open sessions with this connection.
