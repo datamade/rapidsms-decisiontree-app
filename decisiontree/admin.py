@@ -16,7 +16,9 @@ class TreeAdmin(admin.ModelAdmin):
 
 
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'text')
+    list_display = ('text', 'id')
+    ordering = ['text']
+    search_fields = ['text']
 
 
 class AnswerAdmin(admin.ModelAdmin):
@@ -31,8 +33,11 @@ class StateAdmin(admin.ModelAdmin):
         fk_name = 'current_state'
         extra = 0
 
-    list_display = ('id', 'name', '_message', 'num_retries', 'num_transitions')
+    list_display = ('name', '_message', 'num_retries', 'num_transitions', 'id')
+    ordering = ['name']
+    search_fields = ['name', '_message']
     inlines = (TransitionInlineAdmin,)
+
 
     def _message(self, obj):
         return obj.message.text
@@ -43,7 +48,14 @@ class StateAdmin(admin.ModelAdmin):
 
 
 class TransitionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'current_state', 'answer', 'next_state')
+    def current_state_name(self, obj):
+        return obj.current_state.name
+        
+    current_state_name.admin_order_field = 'current_state__name'
+
+    list_display = ('current_state_name', 'answer', 'next_state', 'id')
+    search_fields = ['current_state', 'answer', 'next_state']
+    ordering = ['current_state__name']
 
 
 class TagAdmin(admin.ModelAdmin):
