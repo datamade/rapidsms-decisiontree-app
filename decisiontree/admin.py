@@ -55,6 +55,7 @@ class TransitionAdmin(admin.ModelAdmin):
 
     list_display = ('current_state_name', 'answer', 'next_state', 'id')
     search_fields = ['current_state', 'answer', 'next_state']
+    ordering = ['current_state__name']
 
 
 class TagAdmin(admin.ModelAdmin):
