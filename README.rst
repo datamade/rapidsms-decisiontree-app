@@ -3,96 +3,32 @@ rapidsms-decisiontree-app
 
 This application is a generic implementation of a decision tree, which is
 completely database-configurable. Users are asked questions and respond via
-SMS messages using the RapidSMS framework built on top of Django.
+SMS messages using the RapidSMS framework built on top of Django. 
+`Dimagi <http://www.dimagi.com/>`_ wrote the original code for this project, and `Caktus
+Consulting Group, LLC <http://www.caktusgroup.com/services>`_ currently packages and maintains it.
 
-The original code for this application was written by `Dimagi
-<http://www.dimagi.com/>`_ and is currently packaged and maintained by `Caktus
-Consulting Group, LLC <http://www.caktusgroup.com/services>`_.
+Visit `the parent repo <https://github.com/caktus/rapidsms-decisiontree-app>`_ to learn about features, installation, and the test suite. See the `full documentation <http://rapidsms-decisiontree-app.readthedocs.org/>`_ for a complete overview of usage.
 
-Requirements
+DataMade forked and customized ``rapidsms-decisiontree-app`` to meet the requirements of 
+`Coordinated Entry Screening (CES) <https://github.com/datamade/coordinated-entry-screening>`_, a tool to help people experiencing homelessness find resources. 
+
+Customizations
 ------------
+This fork includes several adjustments – most notably, significant, CES-specific changes made to the data models and the ``handle`` function in the `the decisiontree App <https://github.com/datamade/rapidsms-decisiontree-app/blob/master/decisiontree/app.py>`_.
 
-`rapidsms-decisiontree-app` is tested on RapidSMS 0.19, Django 1.7, and
-Python 2.7. There is optional support for `django-celery
-<https://github.com/celery/django-celery>`_.
+The decisiontree App and data models
+~~~~~~~~~~~~~~~~~~~~~~
 
-Features
---------
+* The CES tool returns either questions or resource recommendations. This fork renames the "Question" model as "Message" and requires a Transition (the way users navigate between survey questions) to have a ``next_state``. See `this pull request <https://github.com/datamade/rapidsms-decisiontree-app/pull/2>`_ for the full conversation about these changes. 
 
-* Support for sessions (i.e. 100 different users can all go through a session
-  at the same time)
-* Branching logic for the series of questions
-* Tree visualization
-* Errors for unrecognized messages (e.g. 'i don't recognize that kind of
-  fruit') and multiple retries before exiting the session
+* The CES tool also tracks user analytics, such as, identifying when users cancel a survey (i.e., by selecting "goodbye"). This fork adds a ``state_at_close`` field to `the Session model <https://github.com/datamade/rapidsms-decisiontree-app/pull/18>`_.  
 
-Installation
-------------
+* Later versions of Twilio allow for messages longer than 160 characters! `This fork adjusts for that <https://github.com/datamade/rapidsms-decisiontree-app/pull/23>`_.
 
-The latest stable release of rapidsms-decisiontree-app can be installed from
-the Python Package Index (PyPi) with `pip <http://www.pip-installer.org/>`_::
+Other notable changes
+~~~~~~~~~~~~~~~~~~~~~~
 
-    pip install rapidsms-decisiontree-app
+* updates the codebase to use `Django 1.11 and Python 3 <https://github.com/datamade/rapidsms-decisiontree-app/pull/1>`_
+* adds an `INVALID_ANSWER_RESPONSE settings variable <https://github.com/datamade/rapidsms-decisiontree-app/pull/20>`_
 
-Once installed you should include ``'decisiontree'`` in your ``INSTALLED_APPS``
-setting.
-
-.. code-block:: python
-
-    INSTALLED_APPS = (
-        ...
-        'decisiontree',
-        ...
-    )
-
-You'll need to create the necessary database tables::
-
-     python manage.py migrate decisiontree
-
-At this point data can only be viewed/changed in the Django admin. If you want
-to enable this on the front-end you can include the ``decisiontree.urls`` in
-your root url patterns.
-
-.. code-block:: python
-
-    urlpatterns = [
-        ...
-        url(r'^surveys/', include('decisiontree.urls')),
-        ...
-    ]
-
-See the `full documentation
-<http://rapidsms-decisiontree-app.readthedocs.org/>`_ for additional
-configuration options.
-
-Running the Tests
------------------
-
-Test requirements are listed in `requirements/tests.txt` file in the `project
-source <https://github.com/caktus/rapidsms-decisiontree-app>`_. These
-requirements are in addition to RapidSMS and its dependencies.
-
-After you have installed ``'decisiontree'`` in your project, you can
-use the Django test runner to run tests against your installation::
-
-    python manage.py test decisiontree decisiontree.multitenancy
-
-Minimal test settings are included in `decisiontree.tests.settings`; to use
-these settings, include the flag ``--settings=decisiontree.tests.settings``.
-
-To easily run tests against different environments that `rapidsms-decisiontree-app`
-supports, download the source and navigate to the `rapidsms-decisiontree-app`
-directory. From there, you can use tox to run tests against a specific
-environment::
-
-    tox -e python2.7-django1.7.X
-
-Or omit the `-e` argument to run tests against all environments that
-`rapidsms-decisiontree-app` supports.
-
-To see the test coverage you can run::
-
-    coverage run python manage.py test decisiontree decisiontree.multitenacy
-    coverage report -m
-
-A common `.coveragerc` file is include in the repo.
+The basic functionality of `the decisiontree App <https://github.com/datamade/rapidsms-decisiontree-app/blob/master/decisiontree/app.py>`_ remains intact. However, these changes are designed to specifically cooperate with the CES tool and the DataMade fork of RapidSMS: they may not integrate easily with other implementations of ``rapidsms-decisiontree-app``. 
