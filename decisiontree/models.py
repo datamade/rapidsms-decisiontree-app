@@ -10,7 +10,7 @@ from colorful.fields import RGBColorField
 
 @python_2_unicode_compatible
 class Message(models.Model):
-    text = models.TextField(max_length=750, 
+    text = models.TextField(max_length=1000, 
                             verbose_name="message text",
                             help_text="The text to send to the user, e.g., a question, completion text.")
 
